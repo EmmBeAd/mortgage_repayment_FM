@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png">
+  <link rel="stylesheet" href="style.css">
+  
+  <title>Frontend Mentor | Mortgage repayment calculator</title>
+
+  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+  <style>
+    .attribution { font-size: 11px; text-align: center; }
+    .attribution a { color: hsl(228, 45%, 44%); }
+  </style>
+</head>
+<body>
+
+  <main>
+    
+    <div class="wrapper">
+      
+      <div class="input_box">
+        <form id="mort_form" action="">
+          <div class="box_t">
+            <h3>Mortgage Calculator</h3>
+            <button id="clear_btn">Clear All</button>
+
+          </div>
+          <div class="box">
+            <label for="mor_amount">Mortgage Amount</label>
+            <div class="ls_input">
+              <p>$</p>
+              <input type="text" name="" id="mort_amount">
+            </div>
+            <div class="error">This field is required</div>
+
+          </div>
+          <div class="box_hr">
+            <div class="inner_box">
+              <label for="mortgage_term">Mortgage Term</label>
+              <div class="rs_input">
+                <input type="number" name="mortgage_term" id="mortgage_term">
+                <p>years</p>
+              </div>
+              <div class="error">This field is required</div>
+            </div>
+            <div class="inner_box">
+              <label for="int_rate">Interest Rate</label>
+              <div class="rs_input">
+                <input type="number" name="" id="int_rate" step="0.01">
+                <p>%</p>
+              </div>
+              <div class="error">This field is required</div>
+            </div>
+          </div>
+          <div class="box">
+            <label>Mortgage Type</label>
+            <div class="radios">
+              <input type="radio" name="mortgage_type" value="repayment" id="repayment">
+              <label for="repayment">Repayment</label>
+            </div>
+            <div class="radios">
+              <input type="radio" name="mortgage_type" value="int_only" id="int_only">
+              <label for="int_only">Interest Only</label>
+            </div>
+            <div class="error_mtype">This field is required</div>
+            
+          </div>
+          <div class="box">
+            <button class="calculate"><img src="/assets/images/icon-calculator.svg" alt="" height="20px">Calculate Repayments</button>
+
+          </div>
+                
+        </form>
+      </div>
+      <div class="result_box">
+        <div class="empty_results">
+          <!-- Empty results start -->
+
+          <img src="/assets/images/illustration-empty.svg" alt="" height="200px">
+          <h3>Results shown here</h3>
+        
+          <p>Complete the form and click “calculate repayments” to see what your monthly repayments would be.</p>
+        
+          <!-- Empty results end -->
+        </div>
+      
+        <div class="comp_results">
+          
+            <!-- Completed results start -->
+          
+            <h3>Your results</h3>
+          
+            <p>Your results are shown below based on the information you provided. 
+            To adjust the results, edit the form and click “calculate repayments” again.</p>
+
+            <div class="actual_results">
+              <div class="inner_box_res">
+                <p>Your monthly repayments</p>
+                <div id="monthly_pay">
+                  $500,000
+                </div>
+              </div>
+              <hr>
+              <div class="inner_box_res">
+                <p>Total you'll repay over the term</p>
+                <div id="total_payment">
+                  $600,000,000
+                </div>
+              </div>
+
+            </div>
+          
+          
+            <!-- Completed results end -->
+      
+        </div>
+      </div>
+    </div>
+  </main>
+
+  
+  <div class="attribution">
+    Challenge by <a href="https://www.frontendmentor.io?ref=challenge">Frontend Mentor</a>. 
+    Coded by <a href="github.com/EmmBeAd">EmmBeAd</a>.
+  </div>
+
+  <script>
+    let m_form = document.getElementById('mort_form')
+    const calc_btn = document.querySelector('.calculate');
+    let mort_amount = document.getElementById('mort_amount');
+    let mort_term = document.getElementById('mortgage_term');
+    let int_rate = document.getElementById('int_rate');
+    let error = document.querySelectorAll('.error')
+    let error_mtype = document.querySelector('.error_mtype')
+    // let mort_type = document.querySelectorAll('input[name="mortgage_type"]')
+
+    let monthly_pay = document.getElementById('monthly_pay');
+    let total_payment = document.getElementById('total_payment')
+
+    let result_box = document.querySelector('.result_box');
+
+    let all_inputs = document.querySelectorAll('input')
+    let clear_btn = document.getElementById('clear_btn')
+
+    let mort_amount_c;
+
+    let ans_arr = []; 
+
+    validateNumbers(mort_amount)
+
+    mort_amount.addEventListener('input', () =>{
+      console.log('input event triggered')
+      let value = mort_amount.value.replace(/,/g,'');
+      value = parseFloat(value);
+      mort_amount_c = value;
+      if(!isNaN(value)){
+        mort_amount.value = value.toLocaleString()
+      }
+    })
+
+    clear_btn.addEventListener('click', (e) => {
+      e.preventDefault()
+      clear_all(all_inputs, ans_arr, result_box)
+    })
+    
+    function clear_all(all_inputs, ans_arr, result_box){
+      ans_arr = [];
+      result_box.classList.remove('active')
+      for (let i = 0; i < all_inputs.length; i++) {
+        const input = all_inputs[i];
+        if (input.type === 'radio') continue;
+        all_inputs[i].value = '';
+        
+      }
+    }
+    
+    m_form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      
+      const mort_type = document.querySelectorAll('input[name="mortgage_type"]');
+      let selectedMort_type = null;
+      
+      for (let radioButton of mort_type) {
+        if (radioButton.checked) {
+          selectedMort_type = radioButton.value;
+          break;
+        }
+      }
+      
+      if (!selectedMort_type) {
+        error_mtype.classList.add('active');
+        return;
+      } else{
+        error_mtype.classList.remove('active')
+      }
+      
+      let match_error_count = all_inputs.length - 2;
+
+      for(let i = 0; i < match_error_count; i++){
+        if(all_inputs[i].value === ''){
+          error[i].classList.add('active');
+          console.log('empty')
+          return;
+        } else {
+          error[i].classList.remove('active')
+        }
+      }
+        
+        console.log(mort_calculation(int_rate.value, mort_amount_c, mort_term.value, selectedMort_type))
+        ans_arr = [...mort_calculation(Number(int_rate.value),
+                                        Number(mort_amount_c),
+                                        Number(mort_term.value), selectedMort_type)]
+
+        monthly_pay.innerText = '$ ' + ans_arr[0].toLocaleString(undefined, { maximumFractionDigits: 2 })
+        total_payment.innerText = '$ ' + ans_arr[1].toLocaleString(undefined, { maximumFractionDigits: 2 })
+        
+
+        result_box.classList.add('active')
+        ans_arr = [];
+
+      });
+
+      function mort_calculation(int_rate, mort_amount, mort_term, mort_type){
+        let ans;
+        let ans1 = [];
+        let rate = (int_rate / 100) / 12
+        let term = mort_term * 12
+        let total_paym = 0;
+
+        if(mort_type == 'repayment'){
+          ans = mort_amount * ((rate * (1 + rate) ** term) / ((1 + rate) ** term - 1))
+          ans1.push(ans)
+          total_paym = ans * term;
+          ans1.push(total_paym)
+          return ans1
+        } else if(mort_type == 'int_only'){
+            ans = mort_amount * rate
+            ans1.push(ans)
+            total_paym = ans * term
+            ans1.push(total_paym)
+          return ans1
+        }
+      }
+
+      function validateNumbers(input){
+        input.addEventListener('keydown', (e) =>{
+          if(!((e.key >= '0' && e.key <= '9') || 
+                e.key === 'Backspace' || e.key === 'Delete')){
+                  e.preventDefault();
+                }
+        })
+      }
+
+  </script>
+</body>
+</html>
